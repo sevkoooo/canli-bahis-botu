@@ -24,6 +24,14 @@ TELEGRAM_CHAT_ID = "8023313276"
 
 notified_matches = set()
 
+# 403 engeline takılmamak için güncel tarayıcı başlıkları
+REQUEST_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Referer': 'https://www.sofascore.com/'
+}
+
 def get_flag_emoji(country_code):
     if not country_code or len(country_code) != 2:
         return "🌐"
@@ -45,13 +53,12 @@ def send_telegram_message(message):
 
 def get_match_stats(event_id, period='ALL'):
     url = f"https://api.sofascore.com/api/v1/event/{event_id}/statistics"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     
     home_data = {'shots': 0, 'on_target': 0, 'corners': 0}
     away_data = {'shots': 0, 'on_target': 0, 'corners': 0}
     
     try:
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, headers=REQUEST_HEADERS, timeout=10)
         if res.status_code == 200:
             statistics = res.json().get('statistics', [])
             
@@ -84,14 +91,13 @@ def get_match_stats(event_id, period='ALL'):
 
 def get_h2h_stats(event_id):
     url = f"https://api.sofascore.com/api/v1/event/{event_id}/h2h/events"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     
     ht_goals_count = 0
     over_25_count = 0
     total_h2h = 0
     
     try:
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, headers=REQUEST_HEADERS, timeout=10)
         if res.status_code == 200:
             events = res.json().get('events', [])[:5]
             total_h2h = len(events)
@@ -121,9 +127,8 @@ def get_h2h_stats(event_id):
 
 def check_live_matches():
     url = "https://api.sofascore.com/api/v1/sport/football/events/live"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
     try:
-        res = requests.get(url, headers=headers, timeout=15)
+        res = requests.get(url, headers=REQUEST_HEADERS, timeout=15)
         if res.status_code != 200:
             print("Baglanti bekleniyor, Kod:", res.status_code, flush=True)
             return
@@ -344,4 +349,4 @@ if __name__ == '__main__':
     bot_thread = threading.Thread(target=run_bot_loop, daemon=True)
     bot_thread.start()
     run_web_server()
-            
+        
