@@ -41,7 +41,7 @@ def send_telegram_message(message):
     try:
         requests.post(url, data=payload, timeout=10)
     except Exception as e:
-        print("Telegram hatasi:", e)
+        print("Telegram hatasi:", e, flush=True)
 
 def get_match_stats(event_id, period='ALL'):
     url = f"https://api.sofascore.com/api/v1/event/{event_id}/statistics"
@@ -78,7 +78,7 @@ def get_match_stats(event_id, period='ALL'):
                         elif name in ['Corner kicks', 'Corners']:
                             home_data['corners'], away_data['corners'] = h_val, a_val
     except Exception as e:
-        print(f"Stat hatasi ({event_id}):", e)
+        print(f"Stat hatasi ({event_id}):", e, flush=True)
         
     return home_data, away_data
 
@@ -107,7 +107,7 @@ def get_h2h_stats(event_id):
                 if (h_score + a_score) > 2.5:
                     over_25_count += 1
     except Exception as e:
-        print(f"H2H hatasi ({event_id}):", e)
+        print(f"H2H hatasi ({event_id}):", e, flush=True)
         
     if total_h2h == 0:
         return "• H2H Verisi Bulunamadı"
@@ -125,11 +125,11 @@ def check_live_matches():
     try:
         res = requests.get(url, headers=headers, timeout=15)
         if res.status_code != 200:
-            print("Baglanti bekleniyor, Kod:", res.status_code)
+            print("Baglanti bekleniyor, Kod:", res.status_code, flush=True)
             return
 
         events = res.json().get('events', [])
-        print(f"\n[+] Sofascore Canli Taramasi ({len(events)} mac aktif)...")
+        print(f"\n[+] Sofascore Canli Taramasi ({len(events)} mac aktif)...", flush=True)
 
         for event in events:
             fixture_id = event.get('id')
@@ -197,7 +197,7 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *SIRADAKI GOL / MAC USTU*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal: {home} vs {away}")
+                        print(f"-> Sinyal: {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
@@ -222,7 +222,7 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *ILK YARI 0.5 UST*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal: {home} vs {away}")
+                        print(f"-> Sinyal: {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
@@ -247,7 +247,7 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *ILK YARI 0.5 UST (YUKSEK ORAN)*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal (30+ İY): {home} vs {away}")
+                        print(f"-> Sinyal (30+ İY): {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
@@ -272,7 +272,7 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *ILK YARI 1.5 UST*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal: {home} vs {away}")
+                        print(f"-> Sinyal: {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
@@ -297,7 +297,7 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *2.5 UST*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal: {home} vs {away}")
+                        print(f"-> Sinyal: {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
@@ -324,26 +324,24 @@ def check_live_matches():
                                f"{h2h_info}\n\n"
                                f"💡 *BOT ONERISI:* 🎯 *SIRADAKI GOL / {target_line} UST*\n"
                                f"🔗 [Maca Git]({match_link})")
-                        print(f"-> Sinyal (Geç Gol): {home} vs {away}")
+                        print(f"-> Sinyal (Geç Gol): {home} vs {away}", flush=True)
                         send_telegram_message(msg)
                         notified_matches.add(key)
 
     except Exception as e:
-        print("Tarama hatasi:", e)
+        print("Tarama hatasi:", e, flush=True)
 
 def run_bot_loop():
-    print("="*40)
-    print(" GELISMIS CANLI BOT (WEB SUNUCU DESTEKLI) BASLATILDI")
-    print("="*40)
+    print("="*40, flush=True)
+    print(" GELISMIS CANLI BOT (WEB SUNUCU DESTEKLI) BASLATILDI", flush=True)
+    print("="*40, flush=True)
     while True:
+        print("[+] Döngü dönüyor, canlı maçlar taranıyor...", flush=True)
         check_live_matches()
         time.sleep(120)
 
 if __name__ == '__main__':
-    # Canlı maç tarama döngüsünü ayrı bir thread olarak arka planda başlat
     bot_thread = threading.Thread(target=run_bot_loop, daemon=True)
     bot_thread.start()
-
-    # Web sunucusunu ana akışta başlat (Render port 10000 üzerinden burayı dinler ve botu ayakta tutar)
     run_web_server()
-                           
+            
