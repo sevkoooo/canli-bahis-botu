@@ -32,10 +32,17 @@ TELEGRAM_CHAT_ID = "8023313276"
 
 notified_matches = set()
 
-REQUEST_HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+PRIMARY_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     'Accept': 'application/json, text/plain, */*',
     'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Referer': 'https://www.sofascore.com/',
+    'Origin': 'https://www.sofascore.com',
+}
+
+ALT_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+    'Accept': 'application/json, text/plain, */*',
 }
 
 def get_flag_emoji(country_code):
@@ -58,15 +65,32 @@ def send_telegram_message(message):
         print("Telegram hatasi:", e, flush=True)
 
 def fetch_data(target_url):
-    # Alternatif ve daha kararli ucretsiz proxy tüneli
-    encoded_url = urllib.parse.quote(target_url, safe='')
-    proxy_url = f"https://api.codetabs.com/v1/proxy?quest={encoded_url}"
+    # 1. Yol: Dogrudan Sofascore API'sine baglanmayi dene
     try:
-        res = requests.get(proxy_url, headers=REQUEST_HEADERS, timeout=12)
+        res = requests.get(target_url, headers=PRIMARY_HEADERS, timeout=8)
+        if res.status_code == 200:
+            return res.json()
+    except Exception:
+        pass
+
+    # 2. Yol: Alternatif Header ile dene
+    try:
+        res = requests.get(target_url, headers=ALT_HEADERS, timeout=8)
+        if res.status_code == 200:
+            return res.json()
+    except Exception:
+        pass
+
+    # 3. Yol: Guncel Ucretsiz JSON Proxy Yedegi
+    try:
+        encoded_url = urllib.parse.quote(target_url, safe='')
+        fallback_proxy = f"https://api.allorigins.win/raw?url={encoded_url}"
+        res = requests.get(fallback_proxy, headers=PRIMARY_HEADERS, timeout=8)
         if res.status_code == 200:
             return res.json()
     except Exception as e:
-        print(f"Proxy veri cekme hatasi: {e}", flush=True)
+        print(f"Veri cekme hatasi: {e}", flush=True)
+        
     return None
 
 def get_match_stats(event_id, period='ALL'):
@@ -306,10 +330,10 @@ def check_live_matches():
 
 def run_bot_loop():
     print("="*40, flush=True)
-    print(" CANLI BAHIS BOTU KODETABS PROXY MODU AKTIF", flush=True)
+    print(" CANLI BAHIS BOTU COKLU BAGLANTI MODU AKTIF", flush=True)
     print("="*40, flush=True)
     try:
-        send_telegram_message("🟢 *Bot CodeTabs Proxy Modunda Başlatıldı!*")
+        send_telegram_message("🟢 *Bot Çoklu Bağlantı Modunda Başlatıldı!*")
     except:
         pass
         
@@ -321,4 +345,4 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=run_web_server, daemon=True)
     server_thread.start()
     run_bot_loop()
-                    
+    
