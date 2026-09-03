@@ -1,6 +1,7 @@
-import time
+import os
 import requests
 import threading
+import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # --- UCRETSIZ WEB SUNUCU (Render'in kapanmamasi icin) ---
@@ -15,11 +16,6 @@ def run_web_server():
     server_address = ('0.0.0.0', 10000)
     httpd = HTTPServer(server_address, SimpleHandler)
     httpd.serve_forever()
-
-# Web sunucusunu arka planda baslat
-server_thread = threading.Thread(target=run_web_server, daemon=True)
-server_thread.start()
-print("[+] Ucretsiz Web Sunucu 10000 portunda baslatildi.")
 
 
 # --- BOT AYARLARI ---
@@ -335,11 +331,19 @@ def check_live_matches():
     except Exception as e:
         print("Tarama hatasi:", e)
 
-print("="*40)
-print(" GELISMIS CANLI BOT (WEB SUNUCU DESTEKLI) BASLATILDI")
-print("="*40)
+def run_bot_loop():
+    print("="*40)
+    print(" GELISMIS CANLI BOT (WEB SUNUCU DESTEKLI) BASLATILDI")
+    print("="*40)
+    while True:
+        check_live_matches()
+        time.sleep(120)
 
-while True:
-    check_live_matches()
-    time.sleep(120)
-                    
+if __name__ == '__main__':
+    # Canlı maç tarama döngüsünü ayrı bir thread olarak arka planda başlat
+    bot_thread = threading.Thread(target=run_bot_loop, daemon=True)
+    bot_thread.start()
+
+    # Web sunucusunu ana akışta başlat (Render port 10000 üzerinden burayı dinler ve botu ayakta tutar)
+    run_web_server()
+                           
