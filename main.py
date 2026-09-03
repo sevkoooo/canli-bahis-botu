@@ -1,6 +1,28 @@
 import time
 import requests
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# --- UCRETSIZ WEB SUNUCU (Render'in kapanmamasi icin) ---
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"Bot aktif ve calisiyor!")
+
+def run_web_server():
+    server_address = ('0.0.0.0', 10000)
+    httpd = HTTPServer(server_address, SimpleHandler)
+    httpd.serve_forever()
+
+# Web sunucusunu arka planda baslat
+server_thread = threading.Thread(target=run_web_server, daemon=True)
+server_thread.start()
+print("[+] Ucretsiz Web Sunucu 10000 portunda baslatildi.")
+
+
+# --- BOT AYARLARI ---
 TELEGRAM_TOKEN = "8882670040:AAG5HXZqxga2Wy7X2sz6YLs3aJajhFo3rsQ"
 TELEGRAM_CHAT_ID = "8023313276"
 
@@ -314,9 +336,10 @@ def check_live_matches():
         print("Tarama hatasi:", e)
 
 print("="*40)
-print(" GELISMIS CANLI BOT (DAKIKA 30 + GEC GOL DAHIL) BASLATILDI")
+print(" GELISMIS CANLI BOT (WEB SUNUCU DESTEKLI) BASLATILDI")
 print("="*40)
 
 while True:
     check_live_matches()
     time.sleep(120)
+                    
