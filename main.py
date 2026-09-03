@@ -58,11 +58,11 @@ def send_telegram_message(message):
         print("Telegram hatasi:", e, flush=True)
 
 def fetch_data(target_url):
-    # Cloudflare IP engeline takılmamak için ücretsiz proxy tüneli kullanıyoruz
+    # Alternatif ve daha kararli ucretsiz proxy tüneli
     encoded_url = urllib.parse.quote(target_url, safe='')
-    proxy_url = f"https://api.allorigins.win/raw?url={encoded_url}"
+    proxy_url = f"https://api.codetabs.com/v1/proxy?quest={encoded_url}"
     try:
-        res = requests.get(proxy_url, headers=REQUEST_HEADERS, timeout=15)
+        res = requests.get(proxy_url, headers=REQUEST_HEADERS, timeout=12)
         if res.status_code == 200:
             return res.json()
     except Exception as e:
@@ -306,10 +306,10 @@ def check_live_matches():
 
 def run_bot_loop():
     print("="*40, flush=True)
-    print(" CANLI BAHIS BOTU PROXY MODU AKTIF", flush=True)
+    print(" CANLI BAHIS BOTU KODETABS PROXY MODU AKTIF", flush=True)
     print("="*40, flush=True)
     try:
-        send_telegram_message("🟢 *Bot Proxy Modunda Başlatıldı!* Canlı maçlar taranıyor...")
+        send_telegram_message("🟢 *Bot CodeTabs Proxy Modunda Başlatıldı!*")
     except:
         pass
         
@@ -321,4 +321,4 @@ if __name__ == '__main__':
     server_thread = threading.Thread(target=run_web_server, daemon=True)
     server_thread.start()
     run_bot_loop()
-                
+                    
